@@ -124,12 +124,12 @@ def breadthFirstSearch(problem):
     been = []
     result = []
 
-    DFS_stack = util.Queue()
+    BFS_queue = util.Queue()
     first = ([], startState)
-    DFS_stack.push(first)
+    BFS_queue.push(first)
 
-    while not DFS_stack.isEmpty():
-        (currentPath, currentState) = DFS_stack.pop()
+    while not BFS_queue.isEmpty():
+        (currentPath, currentState) = BFS_queue.pop()
         if problem.isGoalState(currentState):
             result = currentPath
             break
@@ -139,7 +139,7 @@ def breadthFirstSearch(problem):
                 toAddPath = currentPath + [neighbour[1]]
                 toAddState = neighbour[0]
                 toAdd = (toAddPath, toAddState)
-                DFS_stack.push(toAdd)
+                BFS_queue.push(toAdd)
 
     return result
     util.raiseNotDefined()
