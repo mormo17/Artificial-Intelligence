@@ -72,13 +72,14 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
 
     Your search algorithm needs to return a list of actions that reaches the
     goal. Make sure to implement a graph search algorithm.
-
+~
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
 
@@ -86,7 +87,32 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
+
+    startState = problem.getStartState()
+    if problem.isGoalState(startState):
+        return []
+
+    been = []
+    result = []
+
+    DFS_stack = util.Stack()
+    first = ([], startState)
+    DFS_stack.push(first)
+
+    while not DFS_stack.isEmpty():
+        (currentPath, currentState) = DFS_stack.pop()
+        if problem.isGoalState(currentState):
+            result = currentPath
+            break
+        if currentState not in been:
+            been.append(currentState)
+            for neighbour in problem.getSuccessors(currentState):
+                toAddPath = currentPath + [neighbour[1]]
+                toAddState = neighbour[0]
+                toAdd = (toAddPath, toAddState)
+                DFS_stack.push(toAdd)
+
+    return result
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
