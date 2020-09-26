@@ -73,6 +73,54 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 
+#   Function Name: searchFunction.
+#   @param: problem
+#   @param: dataStructure -> either Stack, Queue or PriorityQueue; based on algorithm.
+#   @param: hasCost       -> if given algorithm has cost in one step. False by default.
+#   @param: heuristic     -> if given algorithm uses heuristic to optimize. Does not use by default.
+#   
+#   I tried to write general search function, because if I wrote it seperately
+#   there would be many duplicated code segments
+def searchFunction(problem, dataStructure, hasCost = False, heuristic = None):
+    
+    startState = problem.getStartState()
+    
+    if problem.isGoalState(startState):
+        return []
+
+    been = []
+    result = []
+
+    first = ([], startState, 0)
+    
+    if not hasCost:     # if does't have cost, that means that it is either DFS or BFS
+        dataStructure.push(first)
+    else:               # it might be UCS or A*
+        dataStructure.update(first, 0)
+
+    while not dataStructure.isEmpty():
+        (currentPath, currentState, currentCost) = dataStructure.pop()
+        if problem.isGoalState(currentState):
+            result = currentPath
+            break
+        if currentState not in been:
+            been.append(currentState)
+            for neighbour in problem.getSuccessors(currentState):
+                toAddPath = currentPath + [neighbour[1]]
+                toAddState = neighbour[0]
+                toAddCost = currentCost + neighbour[2]
+                toAdd = (toAddPath, toAddState, toAddCost)
+                if not hasCost: 
+                    dataStructure.push(toAdd)
+                else:
+                    if heuristic is not None:
+                        toAddCost += heuristic(toAddState, problem)
+                    dataStructure.update(toAdd, toAddCost)
+
+
+    return result
+
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -87,91 +135,18 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-
-    startState = problem.getStartState()
-    if problem.isGoalState(startState):
-        return []
-
-    been = []
-    result = []
-
-    DFS_stack = util.Stack()
-    first = ([], startState)
-    DFS_stack.push(first)
-
-    while not DFS_stack.isEmpty():
-        (currentPath, currentState) = DFS_stack.pop()
-        if problem.isGoalState(currentState):
-            result = currentPath
-            break
-        if currentState not in been:
-            been.append(currentState)
-            for neighbour in problem.getSuccessors(currentState):
-                toAddPath = currentPath + [neighbour[1]]
-                toAddState = neighbour[0]
-                toAdd = (toAddPath, toAddState)
-                DFS_stack.push(toAdd)
-
-    return result
+    return searchFunction(problem, util.Stack())
     util.raiseNotDefined()
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    startState = problem.getStartState()
-    if problem.isGoalState(startState):
-        return []
-
-    been = []
-    result = []
-
-    BFS_queue = util.Queue()
-    first = ([], startState)
-    BFS_queue.push(first)
-
-    while not BFS_queue.isEmpty():
-        (currentPath, currentState) = BFS_queue.pop()
-        if problem.isGoalState(currentState):
-            result = currentPath
-            break
-        if currentState not in been:
-            been.append(currentState)
-            for neighbour in problem.getSuccessors(currentState):
-                toAddPath = currentPath + [neighbour[1]]
-                toAddState = neighbour[0]
-                toAdd = (toAddPath, toAddState)
-                BFS_queue.push(toAdd)
-
-    return result
+    return searchFunction(problem, util.Queue())
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    startState = problem.getStartState()
-    if problem.isGoalState(startState):
-        return []
-
-    been = []
-    result = []
-
-    UCS_queue = util.PriorityQueue()
-    first = ([], startState, 0)
-    UCS_queue.update(first,0)
-
-    while not UCS_queue.isEmpty():
-        (currentPath, currentState, currentCost) = UCS_queue.pop()
-        if problem.isGoalState(currentState):
-            result = currentPath
-            break
-        if currentState not in been:
-            been.append(currentState)
-            for neighbour in problem.getSuccessors(currentState):
-                toAddPath = currentPath + [neighbour[1]]
-                toAddState = neighbour[0]
-                toAddCost = currentCost + neighbour[2]
-                toAdd = (toAddPath, toAddState, toAddCost)
-                UCS_queue.update(toAdd, toAddCost)
-
-    return result
+    return searchFunction(problem, util.PriorityQueue(), True)
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -183,32 +158,7 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    startState = problem.getStartState()
-    if problem.isGoalState(startState):
-        return []
-
-    been = []
-    result = []
-
-    ASTAR_queue = util.PriorityQueue()
-    first = ([], startState, 0)
-    ASTAR_queue.update(first,0)
-
-    while not ASTAR_queue.isEmpty():
-        (currentPath, currentState, currentCost) = ASTAR_queue.pop()
-        if problem.isGoalState(currentState):
-            result = currentPath
-            break
-        if currentState not in been:
-            been.append(currentState)
-            for neighbour in problem.getSuccessors(currentState):
-                toAddPath = currentPath + [neighbour[1]]
-                toAddState = neighbour[0]
-                toAddCost = currentCost + neighbour[2]
-                toAdd = (toAddPath, toAddState, toAddCost)
-                ASTAR_queue.update(toAdd, toAddCost+heuristic(toAddState, problem))
-
-    return result
+    return searchFunction(problem, util.PriorityQueue(), True, heuristic)
     util.raiseNotDefined()
 
 
