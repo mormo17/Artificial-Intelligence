@@ -199,8 +199,47 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        _, action = self.minimax(gameState)
+        return action
+
+    def minimalValue(self, gameState, depth, currentIndex, alpha, beta):
+        result = float('+inf')  # should be INT_MAX initially
+        for legalAction in gameState.getLegalActions(currentIndex):
+            nextState = gameState.generateSuccessor(currentIndex, legalAction)
+            nextValue, nextAction = self.minimax(nextState, depth, currentIndex + 1, alpha, beta)
+            result = min(result, nextValue)
+            if result < alpha:
+                return result, None
+            beta = min(beta, result)
+        return result, None
+
+    def maximalValue(self, gameState, depth, currentIndex,alpha, beta):
+        result = float('-inf')  # should be INT_MIN initially
+        action = None
+        for legalAction in gameState.getLegalActions(currentIndex):
+            nextState = gameState.generateSuccessor(currentIndex, legalAction)
+            nextValue, nextAction = self.minimax(nextState, depth, currentIndex + 1, alpha, beta)
+            result = max(result, nextValue)
+            if depth == 1 and result == nextValue: 
+                action = legalAction
+            if result > beta:
+                return result, action
+            alpha = max(alpha, result)
+        return result, action  
+    
+    def minimax(self, gameState, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
+        currentIndex = currentIndex % gameState.getNumAgents()
+
+        if gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState), None
+
+        if currentIndex == 0:
+            if depth < self.depth:
+                return self.maximalValue(gameState, depth+1, currentIndex, alpha, beta)
+            else:
+                return self.evaluationFunction(gameState), None
+        else:
+            return self.minimalValue(gameState, depth, currentIndex, alpha, beta)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
