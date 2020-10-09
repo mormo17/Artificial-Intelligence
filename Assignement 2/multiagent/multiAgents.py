@@ -73,8 +73,29 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        # First we need to check, if we bump into ghost
+        # because we will lose; so this is worst possible scenario
+        #
+        for ghostPos in successorGameState.getGhostPositions():
+            if manhattanDistance(newPos, ghostPos) < 2:
+                return -9999999
+        
+        # Now that we checked for nearby enemies, we can
+        # think about scoring more
+        difference = successorGameState.getScore() - currentGameState.getScore()
+        if difference > 0: 
+            return 1.0 + difference
+
+        # Not in this case (where we definetely know that there are no ghost nearby,
+        # but also in all next moves we are not in benefitial position) we try to minimize
+        # distance to next food
+        
+        minDistanceToFood = 999999999 # should be INT_MAX initially
+
+        for food in newFood.asList():
+            distance = manhattanDistance(newPos, food)
+            minDistanceToFood = min(minDistanceToFood, distance)
+        return 1.0 / minDistanceToFood # the closer the better
 
 def scoreEvaluationFunction(currentGameState):
     """
