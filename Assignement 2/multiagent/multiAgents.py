@@ -208,17 +208,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         _, action = self.expectimax(gameState)
         return action
 
-    # def minimalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
-        
-    #     return Helper.minimalValue(self, gameState, depth, currentIndex, True)
-
-    # def maximalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
-        
-    #     return Helper.maximalValue(self, gameState, depth, currentIndex, isAlphaBeta, alpha, beta)
-
-    # def minimax(self, gameState, isExpectiMax=False, isAlphaBeta=False, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
-        
-    #     return Helper.minimax(self, gameState, True, depth, currentIndex, alpha, beta)
 
     def maximalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
         return Helper.maximalValue(self, gameState, depth, currentIndex, True)
@@ -243,7 +232,6 @@ def betterEvaluationFunction(currentGameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
     """
     currentScore = scoreEvaluationFunction(currentGameState)
     currentPosition = currentGameState.getPacmanPosition()
