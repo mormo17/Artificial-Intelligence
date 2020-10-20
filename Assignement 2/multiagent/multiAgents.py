@@ -157,17 +157,17 @@ class MinimaxAgent(MultiAgentSearchAgent):
         _, action = self.minimax(gameState)
         return action
 
-    def minimalValue(self, gameState, depth, currentIndex, isAlphaBeta=False, alpha=0, beta=0):
+    def minimalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
         
         return Helper.minimalValue(self, gameState, depth, currentIndex)
 
-    def maximalValue(self, gameState, depth, currentIndex, isAlphaBeta=False, alpha=0, beta=0):
+    def maximalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
         
         return Helper.maximalValue(self, gameState, depth, currentIndex)
 
-    def minimax(self, gameState, isAlphaBeta=False, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
+    def minimax(self, gameState, isExpectiMax=False, isAlphaBeta=False, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
         
-        return Helper.minimax(self, gameState, False, depth, currentIndex)
+        return Helper.minimax(self, gameState, False, False, depth, currentIndex)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -181,17 +181,17 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         _, action = self.minimax(gameState)
         return action
 
-    def minimalValue(self, gameState, depth, currentIndex, isAlphaBeta=False, alpha=0, beta=0):
+    def minimalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
         
-        return Helper.minimalValue(self, gameState, depth, currentIndex, isAlphaBeta, alpha, beta)
+        return Helper.minimalValue(self, gameState, depth, currentIndex, isExpectiMax, isAlphaBeta, alpha, beta)
 
-    def maximalValue(self, gameState, depth, currentIndex, isAlphaBeta=False, alpha=0, beta=0):
+    def maximalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
         
-        return Helper.maximalValue(self, gameState, depth, currentIndex, isAlphaBeta, alpha, beta)
+        return Helper.maximalValue(self, gameState, depth, currentIndex, isExpectiMax, isAlphaBeta, alpha, beta)
 
-    def minimax(self, gameState, isAlphaBeta=True, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
+    def minimax(self, gameState, isExpectiMax=False, isAlphaBeta=False, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
         
-        return Helper.minimax(self, gameState, True, depth, currentIndex, alpha, beta)
+        return Helper.minimax(self, gameState, False, True, depth, currentIndex, alpha, beta)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -208,16 +208,20 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         _, action = self.expectimax(gameState)
         return action
 
-    def maximalValue(self, gameState, depth, currentIndex):
-        result = float('-inf')  # should be INT_MIN initially
-        action = None
-        for legalAction in gameState.getLegalActions(currentIndex):
-            nextState = gameState.generateSuccessor(currentIndex, legalAction)
-            nextValue, nextAction = self.expectimax(nextState, depth, currentIndex + 1)
-            result = max(result, nextValue)
-            if depth == 1 and result == nextValue: 
-                action = legalAction
-        return result, action
+    # def minimalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
+        
+    #     return Helper.minimalValue(self, gameState, depth, currentIndex, True)
+
+    # def maximalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
+        
+    #     return Helper.maximalValue(self, gameState, depth, currentIndex, isAlphaBeta, alpha, beta)
+
+    # def minimax(self, gameState, isExpectiMax=False, isAlphaBeta=False, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
+        
+    #     return Helper.minimax(self, gameState, True, depth, currentIndex, alpha, beta)
+
+    def maximalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
+        return Helper.maximalValue(self, gameState, depth, currentIndex, True)
 
 
     def expValue(self, gameState, depth, currentIndex):
@@ -231,18 +235,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         return result, action
 
     def expectimax(self, gameState, depth=0, currentIndex=0):
-        currentIndex = currentIndex % gameState.getNumAgents()
-
-        if gameState.isWin() or gameState.isLose():
-            return self.evaluationFunction(gameState), None
-
-        if currentIndex == 0:
-            if depth < self.depth:
-                return self.maximalValue(gameState, depth+1, currentIndex)
-            else:
-                return self.evaluationFunction(gameState), None
-        else:
-            return self.expValue(gameState, depth, currentIndex)
+        return Helper.minimax(self, gameState, True, False, depth, currentIndex)
+            
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -266,11 +260,11 @@ def betterEvaluationFunction(currentGameState):
 
 class Helper:
 
-    def minimalValue(self, gameState, depth, currentIndex, isAlphaBeta=False, alpha=0, beta=0):
+    def minimalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
         result = float('+inf')  # should be INT_MAX initially
         for legalAction in gameState.getLegalActions(currentIndex):
             nextState = gameState.generateSuccessor(currentIndex, legalAction)
-            nextValue, nextAction = self.minimax(nextState, isAlphaBeta, depth, currentIndex + 1, alpha, beta)
+            nextValue, nextAction = self.minimax(nextState, isExpectiMax, isAlphaBeta, depth, currentIndex + 1, alpha, beta)
             result = min(result, nextValue)
             if isAlphaBeta:
                 if result < alpha:
@@ -279,12 +273,15 @@ class Helper:
         return result, None
 
 
-    def maximalValue(self, gameState, depth, currentIndex, isAlphaBeta=False, alpha=0, beta=0):
+    def maximalValue(self, gameState, depth, currentIndex, isExpectiMax=False, isAlphaBeta=False, alpha=0, beta=0):
         result = float('-inf')  # should be INT_MIN initially
         action = None
         for legalAction in gameState.getLegalActions(currentIndex):
             nextState = gameState.generateSuccessor(currentIndex, legalAction)
-            nextValue, nextAction = self.minimax(nextState, isAlphaBeta, depth, currentIndex + 1, alpha, beta)
+            if isExpectiMax:
+                nextValue, nextAction = self.expectimax(nextState, depth, currentIndex + 1)
+            else:
+                nextValue, nextAction = self.minimax(nextState, isExpectiMax, isAlphaBeta, depth, currentIndex + 1, alpha, beta)
             result = max(result, nextValue)
             if depth == 1 and result == nextValue: 
                 action = legalAction
@@ -294,7 +291,7 @@ class Helper:
                 alpha = max(alpha, result)
         return result, action
     
-    def minimax(self, gameState, isAlphaBeta=False, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
+    def minimax(self, gameState, isExpectiMax=False, isAlphaBeta=False, depth=0, currentIndex=0, alpha=float('-inf'), beta=float('inf')):
         currentIndex = currentIndex % gameState.getNumAgents()
 
         if gameState.isWin() or gameState.isLose():
@@ -302,11 +299,13 @@ class Helper:
 
         if currentIndex == 0:
             if depth < self.depth:
-                return self.maximalValue(gameState, depth+1, currentIndex, isAlphaBeta, alpha, beta)
+                return self.maximalValue(gameState, depth+1, currentIndex, isExpectiMax, isAlphaBeta, alpha, beta)
             else:
                 return self.evaluationFunction(gameState), None
         else:
-            return self.minimalValue(gameState, depth, currentIndex, isAlphaBeta, alpha, beta)
+            if isExpectiMax:
+                return self.expValue(gameState, depth, currentIndex)
+            return self.minimalValue(gameState, depth, currentIndex, isExpectiMax, isAlphaBeta, alpha, beta)
 
 
 def getFoodDistances(currentGameState, currentPosition):
