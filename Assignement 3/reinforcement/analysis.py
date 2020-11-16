@@ -25,37 +25,37 @@ def question2():
     return answerDiscount, answerNoise
 
 def question3a():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 0.01       #   In this case, very small discount diminishes exit cost (which is 10)
+    answerNoise = 0             #   noise equal to zero means agent will choose shortest path to reward
+    answerLivingReward = -0.01  #   because reward is negative
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question3b():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 0.01       #   In this case, very small discount diminishes exit cost (which is 10)
+    answerNoise = 0.01          #   noise extremely close to zero will avoid going near risky cliff
+    answerLivingReward = -0.1   #   because reward is negative
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question3c():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 1          #   to choose exit rewars in ANY cases
+    answerNoise = 0             #   noise equal to zero means agent will choose shortest path to reward
+    answerLivingReward = -0.01  #   because of discount it should be negative
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question3d():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 1          #   to choose exit rewars in ANY cases
+    answerNoise = 0.01          #   noise extremely close to zero will avoid going near risky cliff
+    answerLivingReward = -0.01  #   because of discount it should be negative
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question3e():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 1          #   to choose exit rewars in ANY cases
+    answerNoise = 0             #   noise equal to zero means agent will choose shortest path to reward
+    answerLivingReward = 1      #   to stay alive forever and get infinite living points
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
