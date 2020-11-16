@@ -58,11 +58,17 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iterations = iterations
         self.values = util.Counter() # A Counter is a dict with default 0
         self.runValueIteration()
+        
 
+
+    
+    def runValueIteration(self):
+        # Write value iteration code here
+        
         for indx in range(self.iterations):
             new_values = {}
-            for curr_state in mdp.getStates():
-                if mdp.isTerminal(curr_state):
+            for curr_state in self.mdp.getStates():
+                if self.mdp.isTerminal(curr_state):
                     new_values[curr_state] = 0
                 else:
                     new_action = float('-inf')
@@ -71,13 +77,6 @@ class ValueIterationAgent(ValueEstimationAgent):
                     new_values[curr_state] = new_action
             
             self.values = new_values
-
-
-        
-
-    def runValueIteration(self):
-        # Write value iteration code here
-        "*** YOUR CODE HERE ***"
 
 
     def getValue(self, state):
@@ -161,10 +160,10 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
               mdp.isTerminal(state)
         """
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
-        self.values = {}                # A Counter is a dict with default 0
+        self.values = {}
         self.runValueIteration()
 
-    def runValueIteration( self ):
+    def runValueIteration(self):
         states = self.mdp.getStates()
         
         for state in self.mdp.getStates():
@@ -178,13 +177,12 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
         values = []
         if not self.mdp.isTerminal(state):
             for possible_action in self.mdp.getPossibleActions(state): 
-                values.append(self.getQValue(state, possible_action))
+                values.append(self.computeQValueFromValues(state, possible_action))
             self.values[state] = (max(values))
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     """
         * Please read learningAgents.py before reading this.*
-
         A PrioritizedSweepingValueIterationAgent takes a Markov decision process
         (see mdp.py) on initialization and runs prioritized sweeping value iteration
         for a given number of iterations using the supplied parameters.
@@ -195,9 +193,43 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
           construction, run the indicated number of iterations,
           and then act according to the resulting policy.
         """
+        
         self.theta = theta
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
+        
+        self.values = util.Counter()
+        self.runValueIteration()
 
     def runValueIteration(self):
-        "*** YOUR CODE HERE ***"
+        values = {}
+        pq = util.PriorityQueue()
 
+        for state in self.mdp.getStates():
+            if not self.mdp.isTerminal(state):
+                for possible_action in self.mdp.getPossibleActions(state):
+                    for next_state, next_prob in self.mdp.getTransitionStatesAndProbs(state, possible_action):
+                        if  next_state not in values:
+                            values[next_state] = {state}
+                        else:
+                            values[next_state].add(state)
+
+                max_value = max(map(lambda action: self.getQValue(state, action), self.mdp.getPossibleActions(state)))
+                
+                diff  =  abs(self.values[state] - (max_value))
+                pq.push(state, -diff)
+        self.update(pq, values)
+    
+    def update(self, pq, values):
+        for _ in range(self.iterations):
+            if not pq.isEmpty():
+                state = pq.pop()
+                self.values[state] = max(map(lambda action: self.getQValue(state, action), self.mdp.getPossibleActions(state)))
+
+                for curr_value in values[state]:
+                    final_max = max(map(lambda action: self.getQValue(curr_value,action), self.mdp.getPossibleActions(curr_value)))
+                    diff = (abs(self.values[curr_value] - final_max))
+                    if diff > self.theta:
+                        pq.update(curr_value, -diff)
+            else:
+                break
+               

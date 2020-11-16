@@ -50,7 +50,7 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         if state not in self.q_values:
-          self.q_values[state] = { }
+          self.q_values[state] = {}
         
         if action not in self.q_values[state]:
           self.q_values[state][action] = 0.0
