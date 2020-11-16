@@ -21,7 +21,7 @@
 
 def question2():
     answerDiscount = 0.9
-    answerNoise = 0.2
+    answerNoise = 0.01      # if noise is really close to zero, agent will not end up in unintended successor state
     return answerDiscount, answerNoise
 
 def question3a():
