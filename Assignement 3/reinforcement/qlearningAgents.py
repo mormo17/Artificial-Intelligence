@@ -85,14 +85,17 @@ class QLearningAgent(ReinforcementAgent):
         """
         result_action = None
         result_value = float('-inf')
-
+        actions = []
         for possible_action in self.getLegalActions(state):
           q_val = self.getQValue(state, possible_action)
           if result_value < q_val:
             result_value = q_val
             result_action = possible_action   # We want result_action to be action with maximum q_value
-        
-        return result_action
+            actions = [result_action]
+          elif result_action == q_val:
+            actions.append(result_action)
+
+        return random.choice(actions)
 
 
     def getAction(self, state):

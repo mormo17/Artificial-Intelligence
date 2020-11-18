@@ -30,6 +30,7 @@ import mdp, util
 
 from learningAgents import ValueEstimationAgent
 import collections
+import random,util,math
 
 class ValueIterationAgent(ValueEstimationAgent):
     """
@@ -116,13 +117,17 @@ class ValueIterationAgent(ValueEstimationAgent):
         else:
             result_action = None
             result_value = float('-inf')
+            actions = []
             for possible_action in self.mdp.getPossibleActions(state):
                 q_val = self.computeQValueFromValues(state, possible_action)
                 if result_value < q_val:
                     result_value = q_val
                     result_action = possible_action     # We want result_action to be action with maximum q_value
+                    actions = [result_action]
+                elif result_action == q_val:
+                    actions.append(result_action)
 
-            return result_action
+            return random.choice(actions)
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
@@ -217,6 +222,7 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
                 
                 diff  =  abs(self.values[state] - (max_value))
                 pq.push(state, -diff)
+                
         self.update(pq, values)
     
     def update(self, pq, values):

@@ -39,29 +39,29 @@ def question3b():
     # If not possible, return 'NOT POSSIBLE'
 
 def question3c():
-    answerDiscount = 1          #   to choose exit rewars in ANY cases
+    answerDiscount = 1          #   to choose exit rewards in ANY cases
     answerNoise = 0             #   noise equal to zero means agent will choose shortest path to reward
     answerLivingReward = -0.01  #   because of discount it should be negative
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question3d():
-    answerDiscount = 1          #   to choose exit rewars in ANY cases
+    answerDiscount = 1          #   to choose exit rewards in ANY cases (also we assume that living reward is almost non-existent)
     answerNoise = 0.01          #   noise extremely close to zero will avoid going near risky cliff
-    answerLivingReward = -0.01  #   because of discount it should be negative
+    answerLivingReward = -0.01  #   negative and small (because of discount)
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question3e():
-    answerDiscount = 1          #   to choose exit rewars in ANY cases
+    answerDiscount = 1          #   to choose exit rewards in ANY cases
     answerNoise = 0             #   noise equal to zero means agent will choose shortest path to reward
     answerLivingReward = 1      #   to stay alive forever and get infinite living points
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
 def question8():
-    answerEpsilon = 0.4
-    answerLearningRate = 0.8
+    answerEpsilon = None
+    answerLearningRate = None
     return 'NOT POSSIBLE'
     # If not possible, return 'NOT POSSIBLE'
 
