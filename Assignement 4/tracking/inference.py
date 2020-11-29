@@ -101,8 +101,16 @@ class DiscreteDistribution(dict):
         >>> round(samples.count('d') * 1.0/N, 1)
         0.0
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        if self.total() !=1:
+            self.normalize()
+
+        sample = random.random()
+        for key in self.keys():
+            if sample > self[key]:
+                sample -= self[key]
+            else:
+                return key
+
 
 
 class InferenceModule:
@@ -363,8 +371,22 @@ class ParticleFilter(InferenceModule):
         be reinitialized by calling initializeUniformly. The total method of
         the DiscreteDistribution may be useful.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        pacmanPos = gameState.getPacmanPosition()
+        jailPos = self.getJailPosition()
+        distribution = DiscreteDistribution()
+
+        for particle in self.particles:
+            observationProb = self.getObservationProb(observation, pacmanPos, particle, jailPos)
+            distribution[particle] += observationProb
+
+        if distribution.total() == 0:
+            self.initializeUniformly(gameState)
+            return
+        
+        distribution.normalize()
+        self.beliefs = distribution
+        for indx in range(self.numParticles):
+            self.particles[indx] = distribution.sample()
 
     def elapseTime(self, gameState):
         """
