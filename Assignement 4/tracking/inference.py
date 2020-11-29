@@ -439,8 +439,10 @@ class JointParticleFilter(ParticleFilter):
         uniform prior.
         """
         self.particles = []
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        particles = list(itertools.product(self.legalPositions, repeat=self.numGhosts))
+    
+        while len(self.particles) < self.numParticles:
+            self.particles += particles
 
     def addGhostAgent(self, agent):
         """
