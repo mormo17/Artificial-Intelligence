@@ -57,7 +57,6 @@ class DiscreteDistribution(dict):
         Normalize the distribution such that the total value of all keys sums
         to 1. The ratio of values for all keys will remain the same. In the case
         where the total value of the distribution is 0, do nothing.
-
         >>> dist = DiscreteDistribution()
         >>> dist['a'] = 1
         >>> dist['b'] = 2
@@ -84,7 +83,6 @@ class DiscreteDistribution(dict):
         """
         Draw a random sample from the distribution and return the key, weighted
         by the values associated with each key.
-
         >>> dist = DiscreteDistribution()
         >>> dist['a'] = 1
         >>> dist['b'] = 2
@@ -187,12 +185,13 @@ class InferenceModule:
                 return 1.0
             else:
                 return 0.0
-
-        if ghostInJail:
-            if noisyDistanceIsNone:
-                return 1.0
-            else:
-                return 0.0
+        elif ghostInJail:
+            return 0.0
+        # if ghostInJail:
+        #     if noisyDistanceIsNone:
+        #         return 1.0
+        #     else:
+        #         return 0.0
 
         manhattanDist = manhattanDistance(pacmanPosition, ghostPosition)
         observationProb = busters.getObservationProbability(noisyDistance, manhattanDist)
@@ -202,7 +201,6 @@ class InferenceModule:
         """
         Set the position of the ghost for this inference module to the specified
         position in the supplied gameState.
-
         Note that calling setGhostPosition does not change the position of the
         ghost in the GameState object used for tracking the true progression of
         the game.  The code in inference.py only ever receives a deep copy of
@@ -291,14 +289,11 @@ class ExactInference(InferenceModule):
     def observeUpdate(self, observation, gameState):
         """
         Update beliefs based on the distance observation and Pacman's position.
-
         The observation is the noisy Manhattan distance to the ghost you are
         tracking.
-
         self.allPositions is a list of the possible ghost positions, including
         the jail position. You should only consider positions that are in
         self.allPositions.
-
         The update model is not entirely stationary: it may depend on Pacman's
         current position. However, this is not a problem, as Pacman's current
         position is known.
@@ -316,7 +311,6 @@ class ExactInference(InferenceModule):
         """
         Predict beliefs in response to a time step passing from the current
         state.
-
         The transition model is not entirely stationary: it may depend on
         Pacman's current position. However, this is not a problem, as Pacman's
         current position is known.
@@ -362,10 +356,8 @@ class ParticleFilter(InferenceModule):
     def observeUpdate(self, observation, gameState):
         """
         Update beliefs based on the distance observation and Pacman's position.
-
         The observation is the noisy Manhattan distance to the ghost you are
         tracking.
-
         There is one special case that a correct implementation must handle.
         When all particles receive zero weight, the list of particles should
         be reinitialized by calling initializeUniformly. The total method of
@@ -465,17 +457,34 @@ class JointParticleFilter(ParticleFilter):
     def observeUpdate(self, observation, gameState):
         """
         Update beliefs based on the distance observation and Pacman's position.
-
         The observation is the noisy Manhattan distances to all ghosts you
         are tracking.
-
         There is one special case that a correct implementation must handle.
         When all particles receive zero weight, the list of particles should
         be reinitialized by calling initializeUniformly. The total method of
         the DiscreteDistribution may be useful.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        
+        pacmanPos = gameState.getPacmanPosition()
+        distribution = self.getBeliefDistribution()
+        for particle in distribution:
+            for indx in range(self.numGhosts):
+                noisyDistance = observation[indx]
+                ghostPosition = particle[indx]
+                jailPosition = self.getJailPosition(indx)
+                observationProb = self.getObservationProb(noisyDistance, pacmanPos, ghostPosition, jailPosition)
+                distribution[particle] *= observationProb
+
+        if distribution.total() == 0:
+            self.initializeUniformly(gameState)
+            return
+        
+        distribution.normalize()
+        self.beliefs = distribution
+        newParticles = []
+        for indx in range(self.numParticles):
+            newParticles.append(distribution.sample())
+        self.particles = newParticles
 
     def elapseTime(self, gameState):
         """
@@ -488,7 +497,12 @@ class JointParticleFilter(ParticleFilter):
 
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
-            raiseNotDefined()
+            
+            for indx in range(self.numGhosts):
+                agent = self.ghostAgents[indx]
+                posDist = self.getPositionDistribution(gameState, oldParticle, indx, agent)
+                sample = posDist.sample()
+                newParticle[indx] = sample
 
             """*** END YOUR CODE HERE ***"""
             newParticles.append(tuple(newParticle))
