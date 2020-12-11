@@ -99,7 +99,7 @@ class DiscreteDistribution(dict):
         >>> round(samples.count('d') * 1.0/N, 1)
         0.0
         """
-        if self.total() !=1:
+        if self.total() != 1:
             self.normalize()
 
         sample = random.random()
@@ -471,6 +471,7 @@ class JointParticleFilter(ParticleFilter):
             for indx in range(self.numGhosts):
                 noisyDistance = observation[indx]
                 ghostPosition = particle[indx]
+                # print(ghostPosition)
                 jailPosition = self.getJailPosition(indx)
                 observationProb = self.getObservationProb(noisyDistance, pacmanPos, ghostPosition, jailPosition)
                 distribution[particle] *= observationProb
