@@ -71,7 +71,16 @@ class RegressionModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        self.first_hidden_layer = nn.Parameter(1, 40)
+        self.second_hidden_layer = nn.Parameter(40, 150)
+        self.third_hidden_layer = nn.Parameter(150, 1)
+
+        self.first_hidden_layer_bias = nn.Parameter(1, 40)
+        self.second_hidden_layer_bias = nn.Parameter(1, 150)
+        self.third_hidden_layer_bias = nn.Parameter(1, 1)
+
+        self.batch_size = 200
+        self.learning_rate = -0.01
 
     def run(self, x):
         """
@@ -82,7 +91,18 @@ class RegressionModel(object):
         Returns:
             A node with shape (batch_size x 1) containing predicted y-values
         """
-        "*** YOUR CODE HERE ***"
+        first_res = nn.Linear(x, self.first_hidden_layer)
+        first_res = nn.AddBias(first_res, self.first_hidden_layer_bias)
+        first_res = nn.ReLU(first_res)
+
+        second_res = nn.Linear(first_res, self.second_hidden_layer)
+        second_res = nn.AddBias(second_res, self.second_hidden_layer_bias)
+        second_res = nn.ReLU(second_res)
+
+        output = nn.Linear(second_res, self.third_hidden_layer)
+        output = nn.AddBias(output, self.third_hidden_layer_bias)
+
+        return output
 
     def get_loss(self, x, y):
         """
@@ -94,13 +114,37 @@ class RegressionModel(object):
                 to be used for training
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+
+        return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+
+        accuracy_achieved = False
+        while not accuracy_achieved:
+            for input, res in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(input, res)
+                parameters = [self.first_hidden_layer, self.first_hidden_layer_bias,
+                                  self.second_hidden_layer, self.second_hidden_layer_bias,
+                                  self.third_hidden_layer, self.third_hidden_layer_bias]
+                gradients_output = nn.gradients(loss, parameters)
+
+                self.first_hidden_layer.update(gradients_output[0], self.learning_rate)
+                self.first_hidden_layer_bias.update(gradients_output[1], self.learning_rate)
+                self.second_hidden_layer.update(gradients_output[2], self.learning_rate)
+                self.second_hidden_layer_bias.update(gradients_output[3], self.learning_rate)
+                self.third_hidden_layer.update(gradients_output[4], self.learning_rate)
+                self.third_hidden_layer_bias.update(gradients_output[5], self.learning_rate)
+
+                if nn.as_scalar(loss) < 0.02:
+                    accuracy_achieved = True
+
+            if accuracy_achieved:
+                break
+
+        
 
 class DigitClassificationModel(object):
     """
