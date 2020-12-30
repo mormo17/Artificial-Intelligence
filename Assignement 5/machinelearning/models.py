@@ -174,8 +174,8 @@ class DigitClassificationModel(object):
         self.fourth_hidden_layer_bias = nn.Parameter(1, 64)
         self.fifth_hidden_layer_bias = nn.Parameter(1,10)
 
-        self.batch_size = 100
-        self.learning_rate = -0.1
+        self.batch_size = 200
+        self.learning_rate = -0.95
 
     def run(self, x):
         """
@@ -255,7 +255,7 @@ class DigitClassificationModel(object):
                 self.fifth_hidden_layer.update(gradients_output[8], self.learning_rate)
                 self.fifth_hidden_layer_bias.update(gradients_output[9], self.learning_rate)
 
-                if dataset.get_validation_accuracy() >= 0.97:
+                if dataset.get_validation_accuracy() >= 0.975:
                     accuracy_achieved = True
 
             if accuracy_achieved:
