@@ -278,7 +278,14 @@ class LanguageIDModel(object):
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
 
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        self.batch_size = 20
+        self.hidden_weight = 200
+        self.learning_rate = -0.1
+        
+        self.first_hidden_layer_weight = nn.Parameter(self.num_chars, self.hidden_weight)
+        self.second_hidden_layer_weight = nn.Parameter(self.hidden_weight, self.hidden_weight)
+        self.output_weight = nn.Parameter(self.hidden_weight, len(self.languages))
+
 
     def run(self, xs):
         """
@@ -309,7 +316,18 @@ class LanguageIDModel(object):
             A node with shape (batch_size x 5) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+
+        result = xs[0]       # Dimensions: batch_size x num_chars
+        result = nn.ReLU(nn.Linear(result, self.first_hidden_layer_weight))    # Dimensions: batch_size x hidden_weight
+
+        for x in xs[1:]:
+            x_i = nn.Linear(x, self.first_hidden_layer_weight)
+            result = nn.ReLU(nn.Add(x_i, nn.Linear(result, self.second_hidden_layer_weight)))
+
+        output = nn.Linear(result, self.output_weight)
+
+        return output
+
 
     def get_loss(self, xs, y):
         """
@@ -325,10 +343,38 @@ class LanguageIDModel(object):
             y: a node with shape (batch_size x 5)
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        return nn.SoftmaxLoss(self.run(xs), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        accuracy_achieved = False
+        while not accuracy_achieved:
+            for input, res in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(input, res)
+                parameters = [self.first_hidden_layer_weight, self.second_hidden_layer_weight, self.output_weight]
+                gradients_output = nn.gradients(loss, parameters)
+
+                self.first_hidden_layer_weight.update(gradients_output[0], self.learning_rate)
+                self.second_hidden_layer_weight.update(gradients_output[1], self.learning_rate)
+                self.output_weight.update(gradients_output[2], self.learning_rate)
+
+                if dataset.get_validation_accuracy() >= 0.89:
+                    accuracy_achieved = True
+                elif dataset.get_validation_accuracy() >= 0.85:
+                    self.learning_rate = -0.02
+                elif dataset.get_validation_accuracy() >= 0.83:
+                    self.learning_rate = -0.03
+                elif dataset.get_validation_accuracy() >= 0.8:
+                    self.learning_rate = -0.04
+                elif dataset.get_validation_accuracy() >= 0.75:
+                    self.learning_rate = -0.05
+                elif dataset.get_validation_accuracy() >= 0.7:
+                    self.learning_rate = -0.06
+                else:
+                    self.learning_rate = -0.1
+
+
+            if accuracy_achieved:
+                break
