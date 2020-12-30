@@ -162,7 +162,20 @@ class DigitClassificationModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        self.first_hidden_layer = nn.Parameter(784, 512)
+        self.second_hidden_layer = nn.Parameter(512, 256)
+        self.third_hidden_layer = nn.Parameter(256, 128)
+        self.fourth_hidden_layer = nn.Parameter(128, 64)
+        self.fifth_hidden_layer = nn.Parameter(64, 10)
+
+        self.first_hidden_layer_bias = nn.Parameter(1, 512)
+        self.second_hidden_layer_bias = nn.Parameter(1, 256)
+        self.third_hidden_layer_bias = nn.Parameter(1, 128)
+        self.fourth_hidden_layer_bias = nn.Parameter(1, 64)
+        self.fifth_hidden_layer_bias = nn.Parameter(1,10)
+
+        self.batch_size = 100
+        self.learning_rate = -0.1
 
     def run(self, x):
         """
@@ -178,7 +191,26 @@ class DigitClassificationModel(object):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+        first_res = nn.Linear(x, self.first_hidden_layer)
+        first_res = nn.AddBias(first_res, self.first_hidden_layer_bias)
+        first_res = nn.ReLU(first_res)
+
+        second_res = nn.Linear(first_res, self.second_hidden_layer)
+        second_res = nn.AddBias(second_res, self.second_hidden_layer_bias)
+        second_res = nn.ReLU(second_res)
+
+        third_res = nn.Linear(second_res, self.third_hidden_layer)
+        third_res = nn.AddBias(third_res, self.third_hidden_layer_bias)
+        third_res = nn.ReLU(third_res)
+
+        fourth_res = nn.Linear(third_res, self.fourth_hidden_layer)
+        fourth_res = nn.AddBias(fourth_res, self.fourth_hidden_layer_bias)
+        fourth_res = nn.ReLU(fourth_res)
+
+        output = nn.Linear(fourth_res, self.fifth_hidden_layer)
+        output = nn.AddBias(output, self.fifth_hidden_layer_bias)
+
+        return output
 
     def get_loss(self, x, y):
         """
@@ -193,13 +225,41 @@ class DigitClassificationModel(object):
             y: a node with shape (batch_size x 10)
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        
+        return nn.SoftmaxLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        
+        accuracy_achieved = False
+        while not accuracy_achieved:
+            for input, res in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(input, res)
+                parameters = [self.first_hidden_layer, self.first_hidden_layer_bias,
+                                  self.second_hidden_layer, self.second_hidden_layer_bias,
+                                  self.third_hidden_layer, self.third_hidden_layer_bias,
+                                  self.fourth_hidden_layer, self.fourth_hidden_layer_bias,
+                                  self.fifth_hidden_layer, self.fifth_hidden_layer_bias]
+                gradients_output = nn.gradients(loss, parameters)
+
+                self.first_hidden_layer.update(gradients_output[0], self.learning_rate)
+                self.first_hidden_layer_bias.update(gradients_output[1], self.learning_rate)
+                self.second_hidden_layer.update(gradients_output[2], self.learning_rate)
+                self.second_hidden_layer_bias.update(gradients_output[3], self.learning_rate)
+                self.third_hidden_layer.update(gradients_output[4], self.learning_rate)
+                self.third_hidden_layer_bias.update(gradients_output[5], self.learning_rate)
+                self.fourth_hidden_layer.update(gradients_output[6], self.learning_rate)
+                self.fourth_hidden_layer_bias.update(gradients_output[7], self.learning_rate)
+                self.fifth_hidden_layer.update(gradients_output[8], self.learning_rate)
+                self.fifth_hidden_layer_bias.update(gradients_output[9], self.learning_rate)
+
+                if dataset.get_validation_accuracy() >= 0.97:
+                    accuracy_achieved = True
+
+            if accuracy_achieved:
+                break
 
 class LanguageIDModel(object):
     """
